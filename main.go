@@ -70,10 +70,37 @@ func main() {
 func launch(p Process, done chan bool) {
     /* Convert p.args to a slice, so the process gets separate arguments. */
     var cmd = exec.Command(p.Path, squeeze(strings.Split(p.Args, " "))...)
-    /* Use the parent's stdout and stderr. */
-    cmd.Stdout = os.Stdout
-    cmd.Stderr = os.Stderr
-    cmd.Run()
+
+    /* If there's an output file for stdout specified, use it. */
+    if p.Stdout != "" {
+        stdout_file, err := os.OpenFile(p.Stdout,
+                    os.O_CREATE | os.O_APPEND | os.O_WRONLY, 0664)
+        if err != nil {
+            log.Println("Failed to open log file ", p.Stdout, "\n", err)
+        }
+        defer stdout_file.Close()
+        cmd.Stdout = stdout_file
+    /* If not, use /dev/null. */
+    } else {
+        cmd.Stdout = nil
+    }
+
+    /* If there's an output file for stderr specified, use it. */
+    if p.Stderr != "" {
+        stderr_file, err := os.OpenFile(p.Stderr,
+                    os.O_CREATE | os.O_APPEND | os.O_WRONLY, 0664)
+        if err != nil {
+            log.Println("Failed to open log file ", p.Stderr, "\n", err)
+        }
+        defer stderr_file.Close()
+        cmd.Stderr = stderr_file
+    /* If not, use /dev/null. */
+    } else {
+        cmd.Stderr = nil
+    }
+
+    /* Fire off the chiled process, then wait for it to complete. */
+    cmd.Start()
     cmd.Wait()
     /* Signal completion. */
     done <- true

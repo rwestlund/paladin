@@ -33,6 +33,10 @@ type Process struct {
     Restart_delay   uint64
     /* Whether to disable restarting on failure. */
     Ignore_failure  bool
+    /* If a process exits within this many milliseconds, don't restart it. A
+     * value of 0 disables this check.
+     */
+    Min_runtime     int
 }
 
 /* The config file definition. Currently, there are only [[process]] blocks,
@@ -49,6 +53,8 @@ type Status struct {
     Id      int
     /* If the process failed for any reason, that reason is here. */
     Err     error
+    /* The duration for which the process ran. */
+    Duration time.Duration
 }
 
 
@@ -80,18 +86,36 @@ func main() {
     for running_processes > 0 {
         /* Block here, waiting for a child to exit. */
         var status = <-done
-        running_processes--;
+        running_processes--
+        var p = &config.Process[status.Id]
+
         /* If there was an error and we should try to start it again. */
-        if status.Err != nil &&
-                config.Process[status.Id].Ignore_failure == false {
-            go launch(config.Process[status.Id], status.Id, done)
-            running_processes++;
+        if status.Err != nil && p.Ignore_failure == false {
+            log.Println("Process", p.Name, "failed after",
+                    status.Duration.String())
+            /* Give up if it failed too quickly. */
+            if p.Min_runtime != 0 &&
+                    time.Duration(p.Min_runtime) * time.Millisecond >
+                        status.Duration {
+                log.Println("Process", p.Name,
+                        "failed too quickly. Giving up.");
+            /* If it didn't fail too quickly, continue with restart. */
+            } else {
+                /* Wait the required time before restarting. */
+                time.Sleep(time.Duration(p.Restart_delay) * time.Millisecond)
+
+                /* Actually restart it. */
+                log.Println("Process", p.Name, "launching")
+                go launch(*p, status.Id, done)
+                running_processes++
+            }
+
         /* If the process completed successfully or we don't care. */
         } else {
-            log.Println("Process", config.Process[status.Id].Name, "finished")
+            log.Println("Process", p.Name, "finished after",
+                    status.Duration.String())
         }
     }
-    time.Sleep(10 * time.Millisecond)
     log.Println("Exiting")
 }
 
@@ -137,6 +161,7 @@ func launch(p Process, id int, done chan Status) {
     }
 
     /* Fire off the chiled process, then wait for it to complete. */
+    var start_time = time.Now()
     var err = cmd.Start()
     if err != nil {
         log.Println("Failed to start process", p.Name)
@@ -144,13 +169,14 @@ func launch(p Process, id int, done chan Status) {
         return
     }
     err = cmd.Wait()
+    var duration = time.Since(start_time)
     if err != nil {
         log.Println("Process failed to run", p.Name)
-        done <- Status{ Id: id, Err: err }
+        done <- Status{ Id: id, Err: err, Duration: duration }
         return
     }
     /* Signal completion. */
-    done <- Status{ Id: id, Err: nil }
+    done <- Status{ Id: id, Err: nil, Duration: duration }
 }
 
 /* Remove empty strings from a slice of strings. Returns a new slice. */

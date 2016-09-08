@@ -8,9 +8,10 @@ package main
 
 import (
     "log"
-    "strings"
     "os"
     "os/exec"
+    "strings"
+    "time"
     "github.com/BurntSushi/toml"
 )
 
@@ -46,28 +47,32 @@ func main() {
     var config Config
     _, err := toml.DecodeFile(config_file, &config)
     if err != nil {
-        log.Fatal("Failed to parse config file ", config_file, "\n", err)
+        log.Fatal("Failed to parse config file", config_file, "\n", err)
     }
 
     /* Listen on this channel to know when all goroutines are done. */
-    var done = make(chan bool)
-    for _, p := range config.Process {
-        log.Println("Launching ", p.Name)
+    var done = make(chan int)
+
+    /* Launch all processes. */
+    for i, p := range config.Process {
+        log.Println("Process", p.Name, "launching")
         /* Launch the process in a new goroutine. */
-        go launch(p, done)
+        go launch(p, i, done)
     }
+
     /* Listen for one done signal from each goroutine. */
     for range config.Process {
-        <-done
-        log.Println("A process finished");
+        var index = <-done
+        log.Println("Process", config.Process[index].Name, "finished")
     }
-    log.Println("Exiting");
+    time.Sleep(10)
+    log.Println("Exiting")
 }
 
-/* Take a process and notification channel. Launch the process, wait for it to
- * exit, and signal completion.
+/* Take a process, an id, and notification channel. Launch the process, wait
+ * for it to exit, and signal completion by returning the id on the channel.
  */
-func launch(p Process, done chan bool) {
+func launch(p Process, id int, done chan int) {
     /* Convert p.args to a slice, so the process gets separate arguments. */
     var cmd = exec.Command(p.Path, squeeze(strings.Split(p.Args, " "))...)
 
@@ -76,7 +81,7 @@ func launch(p Process, done chan bool) {
         stdout_file, err := os.OpenFile(p.Stdout,
                     os.O_CREATE | os.O_APPEND | os.O_WRONLY, 0664)
         if err != nil {
-            log.Println("Failed to open log file ", p.Stdout, "\n", err)
+            log.Println("Failed to open log file", p.Stdout, "\n", err)
         }
         defer stdout_file.Close()
         cmd.Stdout = stdout_file
@@ -90,7 +95,7 @@ func launch(p Process, done chan bool) {
         stderr_file, err := os.OpenFile(p.Stderr,
                     os.O_CREATE | os.O_APPEND | os.O_WRONLY, 0664)
         if err != nil {
-            log.Println("Failed to open log file ", p.Stderr, "\n", err)
+            log.Println("Failed to open log file", p.Stderr, "\n", err)
         }
         defer stderr_file.Close()
         cmd.Stderr = stderr_file
@@ -103,7 +108,7 @@ func launch(p Process, done chan bool) {
     cmd.Start()
     cmd.Wait()
     /* Signal completion. */
-    done <- true
+    done <- id
 }
 
 /* Remove empty strings from a slice of strings. Returns a new slice. */

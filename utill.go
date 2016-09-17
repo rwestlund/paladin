@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * This code is under the BSD-2-Clause license.
+ *
+ * This is the main file. Run it to launch the application.
+ */
 package main
 
 /* Remove empty strings from a slice of strings. Returns a new slice. */

@@ -12,7 +12,7 @@ import (
 )
 
 func HandleRunning(g *Global, status LaunchStatus) {
-	//log.Println("Process", status.Name, "\trunning")
+	log.Println("Process", status.Name, "\trunning as\t", status.Pid)
 
 	var proc *Process = g.Procs[status.Name]
 	proc.Running = true

@@ -10,7 +10,10 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/user"
+	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -56,17 +59,30 @@ func LaunchProcess(pc ProcessConfig, g *Global) {
 		cmd.Stderr = cmd.Stdout
 	}
 
+	/* Set user and group. */
+	uid, gid, err := GetUidGid(pc.User, pc.Group)
+	if err != nil {
+		g.DoneChan <- LaunchStatus{Name: pc.Name, Err: err}
+		return
+	}
+
+	if uid != 0 || gid != 0 {
+		cmd.SysProcAttr = &syscall.SysProcAttr{}
+		cmd.SysProcAttr.Credential =
+			&syscall.Credential{Uid: uint32(uid), Gid: uint32(gid)}
+	}
+
 	/* Fire off the chiled process, then wait for it to complete. */
 	var start_time = time.Now()
-	var err = cmd.Start()
+	err = cmd.Start()
 	if err != nil {
-		log.Println("Process", pc.Name, "\tfailed to start")
+		log.Println("Process", pc.Name, "\tfailed to start", err.Error())
 		g.DoneChan <- LaunchStatus{Name: pc.Name, Err: err}
 		return
 	}
 
 	/* Signal that the process is running. */
-	g.RunningChan <- LaunchStatus{Name: pc.Name}
+	g.RunningChan <- LaunchStatus{Name: pc.Name, Pid: cmd.Process.Pid}
 
 	err = cmd.Wait()
 	var duration = time.Since(start_time)
@@ -77,4 +93,35 @@ func LaunchProcess(pc ProcessConfig, g *Global) {
 	}
 	/* Signal completion. */
 	g.DoneChan <- LaunchStatus{Name: pc.Name, Err: nil, Duration: duration}
+}
+
+func GetUidGid(u string, g string) (uint32, uint32, error) {
+	var uid int
+	var gid int
+	/* Set user and group. */
+	if g != "" {
+		group_obj, err := user.LookupGroup(g)
+		if err != nil {
+			log.Println("Failed to lookup gid", err.Error())
+			return 0, 0, err
+		}
+		gid, err = strconv.Atoi(group_obj.Gid)
+		if err != nil {
+			log.Println("Failed to parse gid", err.Error())
+			return 0, 0, err
+		}
+	}
+	if u != "" {
+		user_obj, err := user.Lookup(u)
+		if err != nil {
+			log.Println("Failed to lookup uid", err.Error())
+			return 0, 0, err
+		}
+		uid, err = strconv.Atoi(user_obj.Uid)
+		if err != nil {
+			log.Println("Failed to parse uid", err.Error())
+			return 0, 0, err
+		}
+	}
+	return uint32(uid), uint32(gid), nil
 }

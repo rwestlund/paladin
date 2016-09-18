@@ -10,6 +10,7 @@ services. It provides the following features:
 - Automatically restart failed processes.
 - Log each process to a different file, even separating stdout and stderr.
 - Specify process dependencies, so things start in the right order.
+- Launch processes under different users and groups.
 
 ## Installation
 
@@ -46,6 +47,8 @@ The following options are per-process, and go in a `[[process]]` block:
 |`args`          | N | A single string with all arguments for the process.
 |`stdout`        | N | The file path for logging stdout.
 |`stderr`        | N | The file path for logging stderr. Follows stdout if unset.
+|`user`          | N | Run the process as this user.
+|`group`         | N | Run the process as this group.
 |`restart_delay` | N | Milliseconds to wait before restarting.
 |`ignore_failure`| N | Boolean. Set to `true` to disable restarting on failure.
 |`min_runtime`   | N | Don't restart if it fails in fewer than this many milliseconds.
@@ -76,4 +79,3 @@ stdout = "/tmp/ls-output"
 - PID files
 - Support programs that fork
 - Specify a cwd
-- Specify user/group

@@ -30,7 +30,7 @@ func main() {
 		logfile, err := os.OpenFile(config.LogFile,
 			os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
 		if err != nil {
-			log.Fatal("Failed to open log file", config.LogFile, "\n", err)
+			log.Fatal("Failed to open log file ", config.LogFile, "\n", err)
 		}
 		defer logfile.Close()
 		log.SetOutput(logfile)

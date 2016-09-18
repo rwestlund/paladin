@@ -13,6 +13,7 @@ import (
 /* The status object returned from launching a child in a goroutine. */
 type LaunchStatus struct {
 	Name string
+	Pid  int
 	/* If the process failed for any reason, that reason is here. */
 	Err error
 	/* The duration for which the process ran. */
@@ -60,6 +61,8 @@ type ProcessConfig struct {
 	 */
 	MinRuntime  int      `toml:"min_runtime"`
 	SoftDepends []string `toml:"soft_depends"`
+	User        string
+	Group       string
 }
 
 /* The config file definition. Currently, there are only [[process]] blocks,

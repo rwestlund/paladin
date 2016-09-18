@@ -6,12 +6,16 @@
  */
 package main
 
-import ()
+import (
+	"log"
+	"os"
+)
 
 /* The location of the configuration file to read. */
 const config_file = "superv.conf"
 
 func main() {
+
 	var g Global = Global{}
 	/* Initialize pointer types. */
 	g.RunningChan = make(chan LaunchStatus)
@@ -20,6 +24,18 @@ func main() {
 
 	/* Read the config file. */
 	var config *Config = ParseConfigFile(config_file)
+
+	// Change logger output destination, if necessary.
+	if config.LogFile != "" {
+		logfile, err := os.OpenFile(config.LogFile,
+			os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
+		if err != nil {
+			log.Fatal("Failed to open log file", config.LogFile, "\n", err)
+		}
+		defer logfile.Close()
+		log.SetOutput(logfile)
+	}
+
 	// Build the global object.
 	for _, pc := range config.Process {
 		g.Procs[pc.Name] = &Process{Config: pc}

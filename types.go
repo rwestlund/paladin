@@ -2,7 +2,7 @@
  * Copyright (c) 2016, Randy Westlund. All rights reserved.
  * This code is under the BSD-2-Clause license.
  *
- * This is the main file. Run it to launch the application.
+ * This file contains struct definitions.
  */
 package main
 
@@ -68,4 +68,6 @@ type ProcessConfig struct {
 type Config struct {
 	/* This must be named after the [[process]] block in the config file. */
 	Process []ProcessConfig
+	// Where to send superv's logging output. Defaults to stderr.
+	LogFile string `toml:"log_file"`
 }

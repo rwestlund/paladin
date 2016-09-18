@@ -44,8 +44,8 @@ The following options are per-process, and go in a `[[process]]` block:
 |`name`          | Y | Used to identify the process.  Must be unique.
 |`path`          | Y | The full path to the program to be run.
 |`args`          | N | A single string with all arguments for the process.
-|`stdout`        | N | The file path to use for logging stdout.
-|`stderr`        | N | The file path to use for logging stderr.
+|`stdout`        | N | The file path for logging stdout.
+|`stderr`        | N | The file path for logging stderr. Follows stdout if unset.
 |`restart_delay` | N | Milliseconds to wait before restarting.
 |`ignore_failure`| N | Boolean. Set to `true` to disable restarting on failure.
 |`min_runtime`   | N | Don't restart if it fails in fewer than this many milliseconds.

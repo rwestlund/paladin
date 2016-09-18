@@ -39,8 +39,8 @@ func LaunchProcess(pc ProcessConfig, g *Global) {
 		cmd.Stdout = nil
 	}
 
-	/* If there's an output file for stderr specified, use it. */
-	if pc.Stderr != "" {
+	/* If there's an output file for stderr that isn't the same as stdout. */
+	if pc.Stderr != "" && pc.Stderr != pc.Stdout {
 		stderr_file, err := os.OpenFile(pc.Stderr,
 			os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
 		if err != nil {
@@ -52,7 +52,8 @@ func LaunchProcess(pc ProcessConfig, g *Global) {
 		cmd.Stderr = stderr_file
 		/* If not, use /dev/null. */
 	} else {
-		cmd.Stderr = nil
+		/* Follow stdout unless stderr is set. */
+		cmd.Stderr = cmd.Stdout
 	}
 
 	/* Fire off the chiled process, then wait for it to complete. */

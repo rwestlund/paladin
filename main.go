@@ -6,9 +6,7 @@
  */
 package main
 
-import (
-	"log"
-)
+import ()
 
 /* The location of the configuration file to read. */
 const config_file = "superv.conf"
@@ -27,12 +25,15 @@ func main() {
 		g.Procs[pc.Name] = &Process{Config: pc}
 	}
 
-	/* Launch all processes. */
+	// Launch only leaf node processes; those that don't depend on any others.
+	// The remaining processes will be launched when the events from these
+	// starting are received.
 	for i := range g.Procs {
-		log.Println("Process", g.Procs[i].Config.Name, "launching")
-		/* Launch the process in a new goroutine. */
-		go LaunchProcess(g.Procs[i].Config, &g)
-		g.RunningProcesses++
+		if len(g.Procs[i].Config.SoftDepends) == 0 {
+			/* Launch the process in a new goroutine. */
+			go LaunchProcess(g.Procs[i].Config, &g)
+			g.RunningProcesses++
+		}
 	}
 
 	for g.RunningProcesses > 0 {

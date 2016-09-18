@@ -19,6 +19,7 @@ import (
  * completion channel, which includes a possible error.
  */
 func LaunchProcess(pc ProcessConfig, g *Global) {
+	log.Println("Process", pc.Name, "\tlaunching")
 	/* Convert p.args to a slice, so the process gets separate arguments. */
 	var cmd = exec.Command(pc.Path, squeeze(strings.Split(pc.Args, " "))...)
 
@@ -58,7 +59,7 @@ func LaunchProcess(pc ProcessConfig, g *Global) {
 	var start_time = time.Now()
 	var err = cmd.Start()
 	if err != nil {
-		log.Println("Failed to start process", pc.Name)
+		log.Println("Process", pc.Name, "\tfailed to start")
 		g.DoneChan <- LaunchStatus{Name: pc.Name, Err: err}
 		return
 	}
@@ -69,7 +70,7 @@ func LaunchProcess(pc ProcessConfig, g *Global) {
 	err = cmd.Wait()
 	var duration = time.Since(start_time)
 	if err != nil {
-		log.Println("Process failed to run", pc.Name)
+		log.Println("Process", pc.Name, "\tfailed to run")
 		g.DoneChan <- LaunchStatus{Name: pc.Name, Err: err, Duration: duration}
 		return
 	}

@@ -16,7 +16,10 @@ following features:
 
 - Clone this repo in your `$GOPATH`
 - Edit `paladin.conf`
-- Run `go run main.go`
+- Run `go build main.go`
+
+Compile with something like `-ldflags="-X main.localbase=/usr/local"` on
+systems where the config file will not live under `/etc`, such as FreeBSD.
 
 ## License
 
@@ -75,7 +78,6 @@ stdout = "/tmp/ls-output"
 
 ## TODO
 
-- Proper config file location
 - PID files
 - Support programs that fork
 - Specify a cwd

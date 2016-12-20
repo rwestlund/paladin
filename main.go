@@ -11,8 +11,14 @@ import (
 	"os"
 )
 
-/* The location of the configuration file to read. */
-const config_file = "superv.conf"
+/*
+ * The location of the configuration file to read. Compile with .e.g.
+ * -ldflags="-X main.localbase=/usr/local" if the config file will not be under
+ * /etc/.
+ */
+
+var localbase = ""
+var config_file = localbase + "/etc/paladin.conf"
 
 func main() {
 

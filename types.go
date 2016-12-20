@@ -71,6 +71,6 @@ type ProcessConfig struct {
 type Config struct {
 	/* This must be named after the [[process]] block in the config file. */
 	Process []ProcessConfig
-	// Where to send superv's logging output. Defaults to stderr.
+	// Where to send paladin's logging output. Defaults to stderr.
 	LogFile string `toml:"log_file"`
 }

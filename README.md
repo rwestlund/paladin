@@ -1,11 +1,11 @@
-# Superv
+# Paladin
 
 A simple process supervisor written in Go.
 
 ## Description
 
-Superv (pronounced 'super vee') is a simple way to launch and maintain
-services. It provides the following features:
+Paladin is a simple way to launch and maintain services. It provides the
+following features:
 - Simple TOML configuration.
 - Automatically restart failed processes.
 - Log each process to a different file, even separating stdout and stderr.
@@ -15,7 +15,7 @@ services. It provides the following features:
 ## Installation
 
 - Clone this repo in your `$GOPATH`
-- Edit `superv.conf`
+- Edit `paladin.conf`
 - Run `go run main.go`
 
 ## License
@@ -26,7 +26,7 @@ text.
 ## Configuration
 
 The config file uses TOML format. It consists of general options, and several
-`[[process]]` blocks that define each process that Superv is responsible for.
+`[[process]]` blocks that define each process that paladin is responsible for.
 
 ### General Options
 
@@ -57,7 +57,7 @@ The following options are per-process, and go in a `[[process]]` block:
 ### Example Configuration
 
 ```
-log_file = "/var/log/superv.log"
+log_file = "/var/log/paladin.log"
 
 [[process]]
 name = "sleep3"

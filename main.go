@@ -9,6 +9,8 @@ package main
 import (
 	"log"
 	"os"
+	"os/signal"
+	"golang.org/x/sys/unix"
 )
 
 /*
@@ -46,6 +48,25 @@ func main() {
 	for _, pc := range config.Process {
 		g.Procs[pc.Name] = &Process{Config: pc}
 	}
+
+	/*
+	 * Listen for a kill signal. When one comes, kill all running children
+	 * before exiting.
+	 */
+	var sigs = make(chan os.Signal)
+	signal.Notify(sigs, unix.SIGTERM, unix.SIGINT)
+	go func() {
+		var sig os.Signal = <-sigs
+		log.Println("Signal", sig, " received, termiating children...")
+		for i := range(g.Procs) {
+			if g.Procs[i].Running {
+				log.Println("killing", g.Procs[i].Config.Name)
+				unix.Kill(g.Procs[i].Status.Pid, unix.SIGTERM)
+			}
+		}
+		log.Println("done")
+		os.Exit(0)
+	}()
 
 	// Launch only leaf node processes; those that don't depend on any others.
 	// The remaining processes will be launched when the events from these

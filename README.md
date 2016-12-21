@@ -75,9 +75,3 @@ args = "-l -a"
 stdout = "/tmp/ls-output"
 
 ```
-
-## TODO
-
-- PID files
-- Support programs that fork
-- Specify a cwd

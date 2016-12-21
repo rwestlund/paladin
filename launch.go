@@ -17,9 +17,9 @@ import (
 	"time"
 )
 
-/* Take a process, an id, and notification channel. Launch the process, wait
- * for it to exit, and signal completion by returning a Status struct on the
- * completion channel, which includes a possible error.
+/* Take a ProcessConfig and Global object. Launch the process, wait for it to
+ * exit, and signal completion by returning a Status struct on the completion
+ * channel, which includes a possible error.
  */
 func LaunchProcess(pc ProcessConfig, g *Global) {
 	log.Println("Process", pc.Name, "\tlaunching")
@@ -72,7 +72,7 @@ func LaunchProcess(pc ProcessConfig, g *Global) {
 			&syscall.Credential{Uid: uint32(uid), Gid: uint32(gid)}
 	}
 
-	/* Fire off the chiled process, then wait for it to complete. */
+	/* Fire off the child process, then wait for it to complete. */
 	var start_time = time.Now()
 	err = cmd.Start()
 	if err != nil {

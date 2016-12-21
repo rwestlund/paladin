@@ -7,10 +7,10 @@
 package main
 
 import (
+	"golang.org/x/sys/unix"
 	"log"
 	"os"
 	"os/signal"
-	"golang.org/x/sys/unix"
 )
 
 /*
@@ -58,7 +58,7 @@ func main() {
 	go func() {
 		var sig os.Signal = <-sigs
 		log.Println("Signal", sig, " received, termiating children...")
-		for i := range(g.Procs) {
+		for i := range g.Procs {
 			if g.Procs[i].Running {
 				log.Println("killing", g.Procs[i].Config.Name)
 				unix.Kill(g.Procs[i].Status.Pid, unix.SIGTERM)

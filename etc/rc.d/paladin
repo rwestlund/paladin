@@ -46,7 +46,7 @@ load_rc_config $name
 : ${paladin_enable:=no}
 
 paladin_start() {
-    /usr/sbin/daemon -p ${pidfile} /usr/local/bin/${name}
+    /usr/sbin/daemon -fc -p ${pidfile} /usr/local/bin/${name}
 }
 
 run_rc_command "$1"

@@ -14,9 +14,10 @@ following features:
 
 ## Installation
 
-- Clone this repo in your `$GOPATH`
-- Edit `paladin.conf`
-- Run `go build main.go`
+- Clone this repo in your `$GOPATH`.
+- Copy `etc/paladin.conf.sample` to `/etc/paladin.conf` and set your values.
+- Run `go build`.
+- Put `paldin` in your path.
 
 Compile with something like `-ldflags="-X main.localbase=/usr/local"` on
 systems where the config file will not live under `/etc`, such as FreeBSD.

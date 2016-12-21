@@ -64,15 +64,20 @@ The following options are per-process, and go in a `[[process]]` block:
 log_file = "/var/log/paladin.log"
 
 [[process]]
-name = "sleep3"
-path = "/bin/sleep"
-args = "3"
-soft_depends = [ "ls" ]
+name = "my-program"
+path = "/path/to/my-program"
+args = ""
+restart_delay = 1000
+min_runtime = 100
+stdout = "/tmp/my-program-stdout"
+user = "myuser"
+group = "mygroup"
 
 [[process]]
-name = "ls"
-path = "/bin/ls"
-args = "-l -a"
-stdout = "/tmp/ls-output"
-
+name = "my-other-program"
+path = "/path/to/my-other-program"
+args = "-a -d"
+min_runtime = 100
+soft_depends = [ "my-program" ]
+restart_delay = 1000
 ```

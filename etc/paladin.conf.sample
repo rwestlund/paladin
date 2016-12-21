@@ -12,6 +12,9 @@
 
 ## Required fields.
 
+# Unique name used to identify the process.
+#name = program-name
+
 # Location of the program to run.
 #path = /path/to/binary
 
@@ -20,12 +23,16 @@
 # Arguments to pass to the program.
 #args = ""
 
-# Time to wait before restarting the process, in milliseconds.
-#restart_delay = 1000
-
 # Which files to use for stdout and stderr.
 #stdout = "/dev/null"
 #stderr = "/dev/null"
+
+# Which user and group to use for the child.
+# user = "root"
+# group = "root"
+
+# Time to wait before restarting the process, in milliseconds.
+#restart_delay = 1000
 
 # Whether to disable restarting on failure.
 #ignore_failure = false
@@ -40,39 +47,20 @@
 log_file = "/var/log/paladin.log"
 
 # Examples:
-[[process]]
-name = "myls"
-path = "ls"
-args = "-a -l"
-restart_delay = 1000
-min_runtime = 100
-stdout = "/tmp/ls-stdout"
+#[[process]]
+#name = "my-program"
+#path = "/path/to/my-program"
+#args = ""
+#restart_delay = 1000
+#min_runtime = 100
+#stdout = "/tmp/my-program-stdout"
+#user = "myuser"
+#group = "mygroup"
 
-[[process]]
-name = "sleep8"
-path = "sleep"
-min_runtime = 100
-args = "8"
-restart_delay = 1000
-#user = "randy"
-#group = "randy"
-
-[[process]]
-name = "sleep3"
-path = "sleep"
-args = "3"
-min_runtime = 100
-soft_depends = [ "sleep8" ]
-restart_delay = 1000
-
-[[process]]
-name ="mypwd"
-path = "pwd"
-args = ""
-#TODO this isn't working
-restart_delay = 1000
-min_runtime = 100
-stdout = "/tmp/pwd-stdout"
-stderr = "/tmp/pwd-stderr"
-soft_depends = [ "myls", "sleep8", "sleep3" ]
-
+#[[process]]
+#name = "my-other-program"
+#path = "/path/to/my-other-program"
+#args = "-a -d"
+#min_runtime = 100
+#soft_depends = [ "my-program" ]
+#restart_delay = 1000

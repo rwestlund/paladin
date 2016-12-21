@@ -53,7 +53,7 @@ type ProcessConfig struct {
 	Stdout string
 	Stderr string
 	/* The number of milliseconds to wait before restarting a process. */
-	RestartDelay uint64 `tome:"restart_delay"`
+	RestartDelay uint64 `toml:"restart_delay"`
 	/* Whether to disable restarting on failure. */
 	IgnoreFailure bool `toml:"ignore_failure"`
 	/* If a process exits within this many milliseconds, don't restart it. A

@@ -1,15 +1,16 @@
 /*
- * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
  * This code is under the BSD-2-Clause license.
  *
  * This file contains general utility functions.
  */
+
 package main
 
-/* Remove empty strings from a slice of strings. Returns a new slice. */
-func squeeze(string_slice []string) []string {
+// Remove empty strings from a slice of strings. Returns a new slice.
+func squeeze(stringSlice []string) []string {
 	var ss []string
-	for _, s := range string_slice {
+	for _, s := range stringSlice {
 		if s != "" {
 			ss = append(ss, s)
 		}

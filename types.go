@@ -49,6 +49,8 @@ type processConfig struct {
 	Path string
 	// A string with arguments to be passed to the process.
 	Args string
+	// The cwd of the process. Defaults to /var/empty.
+	Cwd string
 	// Filenames for writing stdout and stderr. Defaults to /dev/null.
 	Stdout string
 	Stderr string

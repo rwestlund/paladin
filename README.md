@@ -49,6 +49,7 @@ The following options are per-process, and go in a `[[process]]` block:
 |`name`          | Y | Used to identify the process.  Must be unique.
 |`path`          | Y | The full path to the program to be run.
 |`args`          | N | A single string with all arguments for the process.
+|`cwd`           | N | The current working directory for the process.
 |`stdout`        | N | The file path for logging stdout.
 |`stderr`        | N | The file path for logging stderr. Follows stdout if unset.
 |`user`          | N | Run the process as this user.
@@ -67,6 +68,7 @@ log_file = "/var/log/paladin.log"
 name = "my-program"
 path = "/path/to/my-program"
 args = ""
+cwd = "/path/to"
 restart_delay = 1000
 min_runtime = 100
 stdout = "/tmp/my-program-stdout"

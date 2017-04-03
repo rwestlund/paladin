@@ -26,6 +26,13 @@ func launchProcess(pc processConfig, g *global) {
 	// Convert p.args to a slice, so the process gets separate arguments.
 	var cmd = exec.Command(pc.Path, squeeze(strings.Split(pc.Args, " "))...)
 
+	// Set the current working directory for the process.
+	if pc.Cwd != "" {
+		cmd.Dir = pc.Cwd
+	} else {
+		cmd.Dir = "/var/empty"
+	}
+
 	// If there's an output file for stdout specified, use it.
 	if pc.Stdout != "" {
 		var stdoutFile, err = os.OpenFile(pc.Stdout,

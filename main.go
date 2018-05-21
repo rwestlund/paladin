@@ -8,6 +8,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -20,7 +21,6 @@ import (
 // /etc/.
 
 var localbase = ""
-var configFile = localbase + "/etc/paladin.conf"
 
 func main() {
 	var g global = global{}
@@ -30,7 +30,10 @@ func main() {
 	g.Procs = make(map[string]*process)
 
 	// Read the config file.
-	var config *configOptions = parseConfigFile(configFile)
+	var configFile = flag.String("f", localbase+"/etc/paladin.conf",
+		"The configuration file to read from.")
+	flag.Parse()
+	var config *configOptions = parseConfigFile(*configFile)
 
 	// Change logger output destination, if necessary.
 	if config.LogFile != "" {

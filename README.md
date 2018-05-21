@@ -83,3 +83,10 @@ min_runtime = 100
 soft_depends = [ "my-program" ]
 restart_delay = 1000
 ```
+
+### Command-line Options
+
+| Name | Required | Description
+|------|----------|------------
+|`-f`  | N | The config file to use. Defaults to /etc/paladin.conf (unless localbase is set).
+

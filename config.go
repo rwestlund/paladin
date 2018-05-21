@@ -17,7 +17,7 @@ func parseConfigFile(filename string) *configOptions {
 	var config configOptions
 	_, err := toml.DecodeFile(filename, &config)
 	if err != nil {
-		log.Fatal("Failed to parse config file", configFile, "\n", err)
+		log.Fatal("Failed to parse config file ", filename, "\n", err)
 	}
 	return &config
 }

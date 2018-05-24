@@ -109,6 +109,7 @@ func main() {
 		select {
 		// Listen for events fired when a child starts.
 		case status := <-g.RunningChan:
+			g.Procs[status.Name].Status = status
 			handleRunning(&g, status)
 
 		// Listen for events fired when a child exits.

@@ -25,6 +25,9 @@ func launchProcess(pc processConfig, g *global) {
 	log.Println("Process", pc.Name, "\tlaunching")
 	// Convert p.args to a slice, so the process gets separate arguments.
 	var cmd = exec.Command(pc.Path, squeeze(strings.Split(pc.Args, " "))...)
+	// Set the process PGID to not match paladin's, so that it receives
+	// signals separately.
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	// Set the current working directory for the process.
 	if pc.Cwd != "" {
@@ -73,7 +76,6 @@ func launchProcess(pc processConfig, g *global) {
 	}
 
 	if uid != 0 || gid != 0 {
-		cmd.SysProcAttr = &syscall.SysProcAttr{}
 		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
 	}
 

@@ -48,7 +48,7 @@ The following options are per-process, and go in a `[[process]]` block:
 |----------------|---|-------------------------------------------------------
 |`name`          | Y | Used to identify the process.  Must be unique.
 |`path`          | Y | The full path to the program to be run.
-|`args`          | N | A single string with all arguments for the process.
+|`args`          | N | An array of string arguments for the process.
 |`cwd`           | N | The current working directory for the process.
 |`stdout`        | N | The file path for logging stdout.
 |`stderr`        | N | The file path for logging stderr. Follows stdout if unset.
@@ -67,7 +67,7 @@ log_file = "/var/log/paladin.log"
 [[process]]
 name = "my-program"
 path = "/path/to/my-program"
-args = ""
+args = []
 cwd = "/path/to"
 restart_delay = 1000
 min_runtime = 100
@@ -78,7 +78,7 @@ group = "mygroup"
 [[process]]
 name = "my-other-program"
 path = "/path/to/my-other-program"
-args = "-a -d"
+args = ["-a", "-d"]
 min_runtime = 100
 soft_depends = [ "my-program" ]
 restart_delay = 1000

@@ -13,7 +13,6 @@ import (
 	"os/exec"
 	"os/user"
 	"strconv"
-	"strings"
 	"syscall"
 	"time"
 )
@@ -24,7 +23,7 @@ import (
 func launchProcess(pc processConfig, g *global) {
 	log.Println("Process", pc.Name, "\tlaunching")
 	// Convert p.args to a slice, so the process gets separate arguments.
-	var cmd = exec.Command(pc.Path, squeeze(strings.Split(pc.Args, " "))...)
+	var cmd = exec.Command(pc.Path, pc.Args...)
 	// Set the process PGID to not match paladin's, so that it receives
 	// signals separately.
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}

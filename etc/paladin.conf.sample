@@ -21,7 +21,7 @@
 ## Optional fields.
 
 # Arguments to pass to the program.
-#args = ""
+#args = []
 
 # The cwd of the process. Defaults to /var/empty.
 #cwd = "/var/empty"
@@ -53,7 +53,7 @@ log_file = "/var/log/paladin.log"
 #[[process]]
 #name = "my-program"
 #path = "/path/to/my-program"
-#args = ""
+#args = []
 #cwd = "/path/to"
 #restart_delay = 1000
 #min_runtime = 100
@@ -64,7 +64,7 @@ log_file = "/var/log/paladin.log"
 #[[process]]
 #name = "my-other-program"
 #path = "/path/to/my-other-program"
-#args = "-a -d"
+#args = ["-a", "-d"]
 #min_runtime = 100
 #soft_depends = [ "my-program" ]
 #restart_delay = 1000

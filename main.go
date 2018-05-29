@@ -32,11 +32,14 @@ func printYN(b bool) string {
 var localbase = ""
 
 func main() {
-	var g global = global{}
-	// Initialize pointer types.
-	g.RunningChan = make(chan launchStatus)
-	g.DoneChan = make(chan launchStatus)
-	g.Procs = make(map[string]*process)
+	// A dictionary of all processes.
+	procs := make(map[string]*process)
+	// Count the children we have so we know when to exit.
+	runningProcesses := 0
+	// Listen on this channel to know when a program has started.
+	runningChan := make(chan launchStatus)
+	// Listen on this channel to know when a program is done.
+	doneChan := make(chan launchStatus)
 	// This writer will be used to print info in response to SIGINFO.
 	writer := tabwriter.NewWriter(os.Stderr, 0, 8, 0, '\t', 0)
 
@@ -57,9 +60,9 @@ func main() {
 		log.SetOutput(logfile)
 	}
 
-	// Build the global object.
+	// Build the process dictionary.
 	for _, pc := range config.Process {
-		g.Procs[pc.Name] = &process{Config: pc}
+		procs[pc.Name] = &process{Config: pc}
 	}
 
 	// Listen for signals and respond appropriately.
@@ -73,10 +76,10 @@ func main() {
 			// children before exiting.
 			case unix.SIGTERM, unix.SIGINT:
 				log.Println("Signal", sig, " received, termiating children...")
-				for i := range g.Procs {
-					if g.Procs[i].Running {
-						log.Println("killing", g.Procs[i].Config.Name)
-						unix.Kill(g.Procs[i].Status.Pid, unix.SIGTERM)
+				for i := range procs {
+					if procs[i].Running {
+						log.Println("killing", procs[i].Config.Name)
+						unix.Kill(procs[i].Status.Pid, unix.SIGTERM)
 					}
 				}
 				log.Println("done")
@@ -85,10 +88,10 @@ func main() {
 				fmt.Println("The following children are running:")
 				fmt.Fprintln(writer, "Process\tRunning\tPath\tArgs\tUser\tGroup")
 				fmt.Fprintln(writer, "-------\t-------\t----\t----\t----\t-----")
-				for i := range g.Procs {
-					fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n", g.Procs[i].Config.Name,
-						printYN(g.Procs[i].Running), g.Procs[i].Config.Path,
-						g.Procs[i].Config.Args, g.Procs[i].Config.User, g.Procs[i].Config.Group)
+				for i := range procs {
+					fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n", procs[i].Config.Name,
+						printYN(procs[i].Running), procs[i].Config.Path,
+						procs[i].Config.Args, procs[i].Config.User, procs[i].Config.Group)
 					writer.Flush()
 				}
 			}
@@ -98,24 +101,24 @@ func main() {
 	// Launch only leaf node processes; those that don't depend on any others.
 	// The remaining processes will be launched when the events from these
 	// starting are received.
-	for i := range g.Procs {
-		if len(g.Procs[i].Config.SoftDepends) == 0 {
+	for i := range procs {
+		if len(procs[i].Config.SoftDepends) == 0 {
 			// Launch the process in a new goroutine.
-			go launchProcess(g.Procs[i].Config, &g)
-			g.RunningProcesses++
+			go launchProcess(procs[i].Config, runningChan, doneChan)
+			runningProcesses++
 		}
 	}
-	for g.RunningProcesses > 0 {
+	for runningProcesses > 0 {
 		select {
 		// Listen for events fired when a child starts.
-		case status := <-g.RunningChan:
-			g.Procs[status.Name].Status = status
-			handleRunning(&g, status)
+		case status := <-runningChan:
+			procs[status.Name].Status = status
+			handleRunning(procs, runningChan, doneChan, status, runningProcesses)
 
 		// Listen for events fired when a child exits.
-		case status := <-g.DoneChan:
-			g.RunningProcesses--
-			handleDone(&g, status)
+		case status := <-doneChan:
+			runningProcesses--
+			handleDone(procs, runningChan, doneChan, status, runningProcesses)
 		}
 	}
 }

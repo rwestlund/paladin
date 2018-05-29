@@ -30,17 +30,6 @@ type process struct {
 	Running bool
 }
 
-type global struct {
-	// A dictionary of all processes.
-	Procs map[string]*process
-	// Count the children we have active so we know when to exit.
-	RunningProcesses int
-	// Listen on this channel to know when a program has started.
-	RunningChan chan launchStatus
-	// Listen on this channel to know when a program is done.
-	DoneChan chan launchStatus
-}
-
 // A process definition, as read directly from the config file.
 type processConfig struct {
 	// A human-readable tag for process.

@@ -12,33 +12,33 @@ import (
 	"time"
 )
 
-func handleRunning(g *global, status launchStatus) {
+func handleRunning(procs map[string]*process, runningChan, doneChan chan launchStatus, status launchStatus, runningProcesses int) {
 	log.Println("Process", status.Name, "\trunning as\t", status.Pid)
-	var proc *process = g.Procs[status.Name]
+	var proc *process = procs[status.Name]
 	proc.Running = true
 
 	// Check to see whether anything was waiting on this.
-	for i := range g.Procs {
-		if contains(g.Procs[i].Config.SoftDepends, proc.Config.Name) {
-			log.Println("Process", g.Procs[i].Config.Name,
+	for i := range procs {
+		if contains(procs[i].Config.SoftDepends, proc.Config.Name) {
+			log.Println("Process", procs[i].Config.Name,
 				"\twas waiting for\t", status.Name)
 			var ready = true
-			for _, v := range g.Procs[i].Config.SoftDepends {
-				if g.Procs[v].Running == false {
+			for _, v := range procs[i].Config.SoftDepends {
+				if procs[v].Running == false {
 					ready = false
 				}
 			}
 			if ready {
-				go launchProcess(g.Procs[i].Config, g)
-				g.RunningProcesses++
+				go launchProcess(procs[i].Config, runningChan, doneChan)
+				runningProcesses++
 			}
 		}
 	}
 }
 
 // Called whenever a child exits. Take appropriate action, such as restarting.
-func handleDone(g *global, status launchStatus) {
-	var proc *process = g.Procs[status.Name]
+func handleDone(procs map[string]*process, runningChan, doneChan chan launchStatus, status launchStatus, runningProcesses int) {
+	var proc *process = procs[status.Name]
 
 	// If there was an error and we should try to start it again.
 	if status.Err != nil && proc.Config.IgnoreFailure == false {
@@ -54,8 +54,8 @@ func handleDone(g *global, status launchStatus) {
 			time.Sleep(time.Duration(proc.Config.RestartDelay) * time.Millisecond)
 
 			// Actually restart it.
-			go launchProcess(proc.Config, g)
-			g.RunningProcesses++
+			go launchProcess(proc.Config, runningChan, doneChan)
+			runningProcesses++
 		}
 	} else {
 		// If the process completed successfully or we don't care.

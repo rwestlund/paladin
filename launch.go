@@ -17,10 +17,11 @@ import (
 	"time"
 )
 
-// Take a processConfig and global object. Launch the process, wait for it to
-// exit, and signal completion by returning a status struct on the completion
-// channel, which includes a possible error.
-func launchProcess(pc processConfig, g *global) {
+// Take a processConfig and channels. Launch the process and send a status
+// struct on the running channel, wait for it to exit, and signal completion
+// by returning a status struct on the completion channel, which includes a
+// possible error.
+func launchProcess(pc processConfig, runningChan, doneChan chan launchStatus) {
 	log.Println("Process", pc.Name, "\tlaunching")
 	// Convert p.args to a slice, so the process gets separate arguments.
 	var cmd = exec.Command(pc.Path, pc.Args...)
@@ -41,7 +42,7 @@ func launchProcess(pc processConfig, g *global) {
 			os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
 		if err != nil {
 			log.Println("Failed to open log file", pc.Stdout, "\n", err)
-			g.DoneChan <- launchStatus{Name: pc.Name, Err: err}
+			doneChan <- launchStatus{Name: pc.Name, Err: err}
 			return
 		}
 		defer stdoutFile.Close()
@@ -57,7 +58,7 @@ func launchProcess(pc processConfig, g *global) {
 			os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
 		if err != nil {
 			log.Println("Failed to open log file", pc.Stderr, "\n", err)
-			g.DoneChan <- launchStatus{Name: pc.Name, Err: err}
+			doneChan <- launchStatus{Name: pc.Name, Err: err}
 			return
 		}
 		defer stderrFile.Close()
@@ -70,7 +71,7 @@ func launchProcess(pc processConfig, g *global) {
 	// Set user and group.
 	var uid, gid, err = getUIDAndGID(pc.User, pc.Group)
 	if err != nil {
-		g.DoneChan <- launchStatus{Name: pc.Name, Err: err}
+		doneChan <- launchStatus{Name: pc.Name, Err: err}
 		return
 	}
 
@@ -83,23 +84,23 @@ func launchProcess(pc processConfig, g *global) {
 	err = cmd.Start()
 	if err != nil {
 		log.Println("Process", pc.Name, "\tfailed to start", err.Error())
-		g.DoneChan <- launchStatus{Name: pc.Name, Err: err}
+		doneChan <- launchStatus{Name: pc.Name, Err: err}
 		return
 	}
 
 	// Signal that the process is running.
-	g.RunningChan <- launchStatus{Name: pc.Name, Pid: cmd.Process.Pid}
+	runningChan <- launchStatus{Name: pc.Name, Pid: cmd.Process.Pid}
 
 	// Wait for it to finish.
 	err = cmd.Wait()
 	var duration = time.Since(startTime)
 	if err != nil {
 		log.Println("Process", pc.Name, "\tfailed to run")
-		g.DoneChan <- launchStatus{Name: pc.Name, Err: err, Duration: duration}
+		doneChan <- launchStatus{Name: pc.Name, Err: err, Duration: duration}
 		return
 	}
 	// Signal completion.
-	g.DoneChan <- launchStatus{Name: pc.Name, Err: nil, Duration: duration}
+	doneChan <- launchStatus{Name: pc.Name, Err: nil, Duration: duration}
 }
 
 // Get the numeric uid and gid for the given user and group.

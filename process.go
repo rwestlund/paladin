@@ -12,7 +12,13 @@ import (
 	"time"
 )
 
-func handleRunning(procs map[string]*process, runningChan, doneChan chan launchStatus, status launchStatus, runningProcesses int) {
+// Called whenever a child launches.
+func handleRunning(
+	procs map[string]*process,
+	runningChan, doneChan chan launchStatus,
+	status launchStatus,
+	runningProcesses *int,
+) {
 	log.Println("Process", status.Name, "\trunning as\t", status.Pid)
 	var proc *process = procs[status.Name]
 	proc.Running = true
@@ -30,14 +36,21 @@ func handleRunning(procs map[string]*process, runningChan, doneChan chan launchS
 			}
 			if ready {
 				go launchProcess(procs[i].Config, runningChan, doneChan)
-				runningProcesses++
+				*runningProcesses++
 			}
 		}
 	}
 }
 
-// Called whenever a child exits. Take appropriate action, such as restarting.
-func handleDone(procs map[string]*process, runningChan, doneChan chan launchStatus, status launchStatus, runningProcesses int) {
+// Called whenever a child exits. Take appropriate action, such as restarting
+// (if noRestart is not true).
+func handleDone(
+	procs map[string]*process,
+	runningChan, doneChan chan launchStatus,
+	status launchStatus,
+	runningProcesses *int,
+	noRestart bool,
+) {
 	var proc *process = procs[status.Name]
 
 	// If there was an error and we should try to start it again.
@@ -55,7 +68,7 @@ func handleDone(procs map[string]*process, runningChan, doneChan chan launchStat
 
 			// Actually restart it.
 			go launchProcess(proc.Config, runningChan, doneChan)
-			runningProcesses++
+			*runningProcesses++
 		}
 	} else {
 		// If the process completed successfully or we don't care.

@@ -42,19 +42,18 @@ func handleRunning(
 	}
 }
 
-// Called whenever a child exits. Take appropriate action, such as restarting
-// (if noRestart is not true).
+// Called whenever a child exits. Take appropriate action, such as restarting.
 func handleDone(
 	procs map[string]*process,
 	runningChan, doneChan chan launchStatus,
 	status launchStatus,
 	runningProcesses *int,
-	noRestart bool,
+	shutdown bool,
 ) {
 	var proc *process = procs[status.Name]
 
 	// If there was an error and we should try to start it again.
-	if status.Err != nil && proc.Config.IgnoreFailure == false {
+	if status.Err != nil && proc.Config.IgnoreFailure == false && !shutdown {
 		log.Println("Process", proc.Config.Name, "\tfailed after",
 			status.Duration.String())
 		// Give up if it failed too quickly.

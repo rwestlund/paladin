@@ -1,0 +1,4 @@
+github.com/BurntSushi/toml v0.2.1-0.20160717150709-99064174e013 h1:b3U6YBLKb/l6Z2g3UU9I9qb0E8ae2vqNcA3IZtotoYQ=
+github.com/BurntSushi/toml v0.2.1-0.20160717150709-99064174e013/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+golang.org/x/sys v0.0.0-20161214190518-d75a52659825 h1:4d9VvrP9mESHxCpAwE1G5e1D8Ybj9v7pX19HkGQV0lk=
+golang.org/x/sys v0.0.0-20161214190518-d75a52659825/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
